@@ -39,6 +39,24 @@ module AgileCRMWrapper
         end
       end
 
+      def delete_tags_by_email(email, tags)
+        tags = tags.flatten.compact.uniq
+        puts tags
+        response = AgileCRMWrapper.connection.post(
+          'contacts/email/tags/delete', "email=#{email}&tags=#{tags}",
+          'content-type' => 'application/x-www-form-urlencoded
+'        )
+
+        if response.status == 204
+          return response
+        elsif response.status == 400
+          fail(AgileCRMWrapper::WrongFormat.new(response))
+        elsif response.status == 401
+          fail(AgileCRMWrapper::UnAuthorized.new(response))
+        end
+
+      end      
+
       def create(options = {})
         payload = parse_contact_fields(options)
         response = AgileCRMWrapper.connection.post('contacts', payload)
